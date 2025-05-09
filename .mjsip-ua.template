@@ -1,0 +1,75 @@
+#
+# Note: Rename this file to ".mjsip-ua" (and optionally move it to your home directory) to have it picked up by default.
+#
+
+#######################################################################################
+# Configuration for the mjsip user agent.
+#######################################################################################
+
+# Display name for the user.
+# It is used in the user's AOR registered to the registrar server and used as From URL.
+display-name=Test
+
+# User's name.
+# It is used to build the user's AOR registered to the registrar server and used as From URL.
+sip-user=<sip username>
+
+# Fully qualified domain name (or address) of the proxy server.
+# It is part of the user's AOR registered to the registrar server and used as From URL.
+# If 'proxy' is not defined, the 'registrar' value is used in its place.
+# If 'registrar' is not defined, the 'proxy' value is used in its place.
+#proxy=
+
+# Fully qualified domain name (or address) of the registrar server.
+# It is used as recipient for REGISTER requests.
+# If 'registrar' is not defined, the 'proxy' value is used in its place.
+# If 'proxy' is not defined, the 'registrar' value is used in its place.
+registrar=<sip server>
+
+# Contact URL.
+# If not defined (default), it is formed as sip:user@via-addr:host-port.
+# Normally you can leave it undefined.
+#contact-url=sip:alice@192.168.0.55:5070
+
+# User's name used for server authentication.
+auth_user=<sip username>
+
+# User's realm used for server authentication.
+auth_realm=<sip realm>>
+
+# User's passwd used for server authentication.
+auth_passwd=<sip password>
+
+# Expires time.
+# Default value: expires=3600
+#expires=1800
+
+# Frequency to send keep-alive packets in milliseconds.
+# Default value: disabled
+keep-alive=60000
+
+# No offer in the invite.
+# Default value: no-offer=no
+#no-offer=yes
+
+# Media address (use it ONLY if you want to specify a media address different from the via address).
+#media-addr=10.0.0.5
+
+# First media port (use it ONLY if you want to specify media ports different from those specified by the 'media' parameter).
+#media-port=7000
+
+# Whether using symmetric-rtp.
+# Default value: symmetric-rtp=no
+#symmetric-rtp=yes
+
+# The RTP media format.
+media=audio 4000 RTP/AVP { 0 PCMU 8000 160 }
+
+# Debug SIP traffic.
+log-all-packets=yes
+
+# The base RTP port
+media-port=10000
+
+# The number of ports to use for RTP
+port-count=10000

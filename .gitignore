@@ -1,0 +1,10 @@
+.mjsip-ua
+target
+.idea
+*.raw
+.DS_Store
+cdk.out
+dependency-reduced-pom.xml
+*.jar
+cdk.context.json
+node_modules
