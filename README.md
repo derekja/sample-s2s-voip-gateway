@@ -97,7 +97,7 @@ To run the project:
 1. SSH into the EC2 instance using the keypair from step 1 of the installation guide and IP address from step 5.
 2. Copy the project from your local computer or git clone it to your EC2 instance.
 3. Configure your Maven settings.xml as detailed in the Maven settings.xml section.
-4. Run the project as follows: `mvn exec:java -Dexec.mainClass=com.example.s2s.voipgateway.NovaSonicVoipGateway`
+4. Run the project as follows: `./run.sh` (this will compile and execute the main class)
 5. Watch for the SIP registration.  Make sure it gets a 200 response.  If it doesn't your credentials may be incorrect.
 6. Call the phone number or extension for your SIP line.  The gateway should answer immediately and greet you.
 7. Converse with Nova Sonic.
