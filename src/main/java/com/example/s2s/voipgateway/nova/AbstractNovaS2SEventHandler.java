@@ -265,26 +265,9 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         // Interrupt the audio output
         audioStream.interrupt();
         
-        // Send EndAudioContent event to signal interruption to Nova
-        // We need to use the current active content name, not a random one
-        if (outbound != null && promptName != null && currentUserContentName != null) {
-            try {
-                // End the current user audio content to interrupt Nova's generation
-                outbound.onNext(new EndAudioContent(EndAudioContent.ContentEnd.builder()
-                        .promptName(promptName)
-                        .contentName(currentUserContentName)
-                        .build()));
-                log.info("Sent EndAudioContent event for content {} to interrupt Nova Sonic", currentUserContentName);
-                
-                // Clear the current content name since we've ended it
-                currentUserContentName = null;
-            } catch (Exception e) {
-                log.error("Failed to send EndAudioContent interruption event", e);
-            }
-        } else {
-            log.warn("Cannot send barge-in interruption: missing promptName={} or currentUserContentName={}", 
-                    promptName, currentUserContentName);
-        }
+        // For barge-in, we just need to stop Nova's audio output
+        // We don't need to send any EndAudioContent events - just interrupt the stream
+        log.info("Barge-in handled: Interrupted Nova's audio output");
         
         // Reset voice detector
         voiceDetector.reset();
