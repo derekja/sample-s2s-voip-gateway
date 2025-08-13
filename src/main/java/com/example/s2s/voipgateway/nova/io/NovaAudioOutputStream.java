@@ -84,6 +84,11 @@ public class NovaAudioOutputStream extends OutputStream {
      * Sends the StartAudioContent event.
      */
     private void sendStart() {
+        // Notify event handler about the current content name for barge-in tracking
+        if (eventHandler != null) {
+            eventHandler.setCurrentUserContentName(contentName);
+        }
+        
         observer.onNext(new StartAudioContent(StartAudioContent.ContentStart.builder()
                 .promptName(promptName)
                 .contentName(contentName)
@@ -110,8 +115,14 @@ public class NovaAudioOutputStream extends OutputStream {
     public void close() throws IOException {
         observer.onNext(new EndAudioContent(EndAudioContent.ContentEnd.builder()
                 .promptName(promptName)
-                .contentName(UUID.randomUUID().toString())
+                .contentName(contentName)
                 .build()));
+        
+        // Clear the tracked content name since this content is ending
+        if (eventHandler != null) {
+            eventHandler.clearCurrentUserContentName();
+        }
+        
         if (audioFileOutput!=null) {
             audioFileOutput.close();
             audioFileOutput=null;

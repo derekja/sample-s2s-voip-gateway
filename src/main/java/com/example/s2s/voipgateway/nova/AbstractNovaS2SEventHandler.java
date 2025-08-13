@@ -35,6 +35,7 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     private boolean playedErrorSound = false;
     private volatile boolean isNovaGenerating = false;
     private boolean bargeInEnabled = "true".equalsIgnoreCase(System.getenv().getOrDefault("ENABLE_BARGE_IN", "true"));
+    private volatile String currentUserContentName = null;
 
     public AbstractNovaS2SEventHandler() {
         this(null);
@@ -265,18 +266,24 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         audioStream.interrupt();
         
         // Send EndAudioContent event to signal interruption to Nova
-        // This is the proper way to interrupt Nova Sonic according to the API
-        if (outbound != null && promptName != null) {
+        // We need to use the current active content name, not a random one
+        if (outbound != null && promptName != null && currentUserContentName != null) {
             try {
-                // End the current audio content to interrupt Nova's generation
+                // End the current user audio content to interrupt Nova's generation
                 outbound.onNext(new EndAudioContent(EndAudioContent.ContentEnd.builder()
                         .promptName(promptName)
-                        .contentName(java.util.UUID.randomUUID().toString())
+                        .contentName(currentUserContentName)
                         .build()));
-                log.info("Sent EndAudioContent event to interrupt Nova Sonic");
+                log.info("Sent EndAudioContent event for content {} to interrupt Nova Sonic", currentUserContentName);
+                
+                // Clear the current content name since we've ended it
+                currentUserContentName = null;
             } catch (Exception e) {
                 log.error("Failed to send EndAudioContent interruption event", e);
             }
+        } else {
+            log.warn("Cannot send barge-in interruption: missing promptName={} or currentUserContentName={}", 
+                    promptName, currentUserContentName);
         }
         
         // Reset voice detector
@@ -297,5 +304,23 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
      */
     public boolean isBargeInEnabled() {
         return bargeInEnabled;
+    }
+    
+    /**
+     * Sets the current user content name for tracking active audio content.
+     * This is needed for proper barge-in functionality.
+     * @param contentName The content name of the current user audio stream
+     */
+    public void setCurrentUserContentName(String contentName) {
+        this.currentUserContentName = contentName;
+        log.debug("Set current user content name: {}", contentName);
+    }
+    
+    /**
+     * Clears the current user content name when content ends.
+     */
+    public void clearCurrentUserContentName() {
+        log.debug("Cleared current user content name: {}", currentUserContentName);
+        this.currentUserContentName = null;
     }
 }
