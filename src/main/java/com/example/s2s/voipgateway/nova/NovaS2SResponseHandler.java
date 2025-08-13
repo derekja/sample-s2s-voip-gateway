@@ -89,6 +89,8 @@ public class NovaS2SResponseHandler implements InvokeModelWithBidirectionalStrea
                     handler.handleCompletionStart(eventNode.get("completionStart"));
                 } else if (eventNode.has("contentStart")) {
                     handler.handleContentStart(eventNode.get("contentStart"));
+                } else if (eventNode.has("textInput")) {
+                    handler.handleTextInput(eventNode.get("textInput"));
                 } else if (eventNode.has("textOutput")) {
                     handler.handleTextOutput(eventNode.get("textOutput"));
                 } else if (eventNode.has("audioOutput")) {

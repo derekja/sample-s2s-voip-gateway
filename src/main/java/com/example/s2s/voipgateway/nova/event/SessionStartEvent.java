@@ -22,8 +22,20 @@ public class SessionStartEvent implements NovaSonicEvent {
         sessionStart.inferenceConfiguration.setTopP(topP);
         sessionStart.inferenceConfiguration.setTemperature(temperature);
     }
+
+    public SessionStartEvent(int maxTokens, float topP, float temperature, String guardrailIdentifier, String guardrailVersion) {
+        this(maxTokens, topP, temperature);
+        if (guardrailIdentifier != null && !guardrailIdentifier.trim().isEmpty()) {
+            GuardrailConfiguration guardrailConfig = new GuardrailConfiguration();
+            guardrailConfig.setGuardrailIdentifier(guardrailIdentifier);
+            guardrailConfig.setGuardrailVersion(guardrailVersion != null ? guardrailVersion : "DRAFT");
+            guardrailConfig.setTrace(true); // Enable trace to get input/output text
+            sessionStart.setGuardrailConfiguration(guardrailConfig);
+        }
+    }
     public static class SessionStart {
         private InferenceConfiguration inferenceConfiguration = new InferenceConfiguration();
+        private GuardrailConfiguration guardrailConfiguration = null;
 
         public SessionStart() {
         }
@@ -35,6 +47,15 @@ public class SessionStartEvent implements NovaSonicEvent {
 
         public void setInferenceConfiguration(InferenceConfiguration inferenceConfiguration) {
             this.inferenceConfiguration = inferenceConfiguration;
+        }
+
+        @JsonGetter("guardrailConfiguration")
+        public GuardrailConfiguration getGuardrailConfiguration() {
+            return guardrailConfiguration;
+        }
+
+        public void setGuardrailConfiguration(GuardrailConfiguration guardrailConfiguration) {
+            this.guardrailConfiguration = guardrailConfiguration;
         }
     }
 
@@ -68,6 +89,39 @@ public class SessionStartEvent implements NovaSonicEvent {
 
         public void setTemperature(float temperature) {
             this.temperature = temperature;
+        }
+    }
+
+    public static class GuardrailConfiguration {
+        private String guardrailIdentifier;
+        private String guardrailVersion;
+        private boolean trace = true; // Enable trace to get input/output text
+
+        @JsonGetter("guardrailIdentifier")
+        public String getGuardrailIdentifier() {
+            return guardrailIdentifier;
+        }
+
+        public void setGuardrailIdentifier(String guardrailIdentifier) {
+            this.guardrailIdentifier = guardrailIdentifier;
+        }
+
+        @JsonGetter("guardrailVersion")
+        public String getGuardrailVersion() {
+            return guardrailVersion;
+        }
+
+        public void setGuardrailVersion(String guardrailVersion) {
+            this.guardrailVersion = guardrailVersion;
+        }
+
+        @JsonGetter("trace")
+        public boolean isTrace() {
+            return trace;
+        }
+
+        public void setTrace(boolean trace) {
+            this.trace = trace;
         }
     }
 }

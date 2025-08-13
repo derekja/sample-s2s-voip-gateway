@@ -64,6 +64,18 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     }
 
     @Override
+    public void handleTextInput(JsonNode node) {
+        String content = node.get("content").asText();
+        String role = node.get("role").asText();
+        
+        if ("user".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role)) {
+            // Log user's transcribed speech
+            conversationLogger.logUserInput(content);
+            log.debug("Logged user input: {}", content);
+        }
+    }
+
+    @Override
     public void handleTextOutput(JsonNode node) {
         String content = node.get("content").asText();
         String role = node.get("role").asText();

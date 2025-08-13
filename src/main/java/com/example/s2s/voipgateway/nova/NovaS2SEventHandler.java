@@ -28,6 +28,12 @@ public interface NovaS2SEventHandler {
     void handleContentStart(JsonNode node);
 
     /**
+     * Handles a textInput event.
+     * @param node
+     */
+    void handleTextInput(JsonNode node);
+
+    /**
      * Handles a textOutput event.
      * @param node
      */

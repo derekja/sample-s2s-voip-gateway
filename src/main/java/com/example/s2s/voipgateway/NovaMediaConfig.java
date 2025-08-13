@@ -15,6 +15,8 @@ public class NovaMediaConfig extends MediaConfig {
     private int novaMaxTokens = DEFAULT_MAX_TOKENS;
     private float novaTopP = DEFAULT_NOVA_TOP_P;
     private float novaTemperature = DEFAULT_NOVA_TEMPERATURE;
+    private String guardrailIdentifier = null;
+    private String guardrailVersion = null;
 
     public String getNovaVoiceId() {
         return novaVoiceId;
@@ -54,5 +56,21 @@ public class NovaMediaConfig extends MediaConfig {
 
     public void setNovaTemperature(float novaTemperature) {
         this.novaTemperature = novaTemperature;
+    }
+
+    public String getGuardrailIdentifier() {
+        return guardrailIdentifier;
+    }
+
+    public void setGuardrailIdentifier(String guardrailIdentifier) {
+        this.guardrailIdentifier = guardrailIdentifier;
+    }
+
+    public String getGuardrailVersion() {
+        return guardrailVersion;
+    }
+
+    public void setGuardrailVersion(String guardrailVersion) {
+        this.guardrailVersion = guardrailVersion;
     }
 }

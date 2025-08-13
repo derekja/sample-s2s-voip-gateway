@@ -126,6 +126,12 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
         if (isConfigured(environ.get("NOVA_PROMPT"))) {
             mediaConfig.setNovaPrompt(environ.get("NOVA_PROMPT"));
         }
+        if (isConfigured(environ.get("NOVA_GUARDRAIL_ID"))) {
+            mediaConfig.setGuardrailIdentifier(environ.get("NOVA_GUARDRAIL_ID"));
+        }
+        if (isConfigured(environ.get("NOVA_GUARDRAIL_VERSION"))) {
+            mediaConfig.setGuardrailVersion(environ.get("NOVA_GUARDRAIL_VERSION"));
+        }
 
         if (isConfigured(environ.get("SIP_SERVER"))) {
             configureFromEnvironment(environ, uaConfig, mediaConfig, portConfig, sipConfig);

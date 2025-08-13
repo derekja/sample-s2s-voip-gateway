@@ -110,7 +110,13 @@ public class NovaStreamerFactory implements StreamerFactory {
      * @return The SessionStartEvent
      */
     private SessionStartEvent createSessionStartEvent() {
-        return new SessionStartEvent(mediaConfig.getNovaMaxTokens(), mediaConfig.getNovaTopP(), mediaConfig.getNovaTemperature());
+        return new SessionStartEvent(
+                mediaConfig.getNovaMaxTokens(), 
+                mediaConfig.getNovaTopP(), 
+                mediaConfig.getNovaTemperature(),
+                mediaConfig.getGuardrailIdentifier(),
+                mediaConfig.getGuardrailVersion()
+        );
     }
 
     /**
