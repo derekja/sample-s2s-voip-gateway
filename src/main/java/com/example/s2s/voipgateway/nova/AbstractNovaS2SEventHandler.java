@@ -262,15 +262,24 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
      * Handles barge-in when user speech is detected during Nova generation.
      */
     private void handleBargeIn() {
-        // Interrupt the audio output
+        // Interrupt the current audio output to stop Nova from speaking
         audioStream.interrupt();
-        
-        // For barge-in, we just need to stop Nova's audio output
-        // We don't need to send any EndAudioContent events - just interrupt the stream
         log.info("Barge-in handled: Interrupted Nova's audio output");
         
-        // Reset voice detector
+        // Reset voice detector for next detection
         voiceDetector.reset();
+        
+        // After a short delay, resume the audio stream so Nova can respond to the user's input
+        // We need to do this because Nova might generate a response to the user's barge-in
+        new Thread(() -> {
+            try {
+                Thread.sleep(500); // Brief pause to let the interruption take effect
+                audioStream.resume();
+                log.info("Audio stream resumed after barge-in pause");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     }
     
     /**
