@@ -102,7 +102,11 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         String stopReason = node.has("stopReason") ? node.get("stopReason").asText() : "";
         log.info("Completion ended with reason: {}", stopReason);
         isNovaGenerating = false;
-        audioStream.resume(); // Resume in case it was interrupted
+        
+        // Resume audio stream and reset voice detector for next interaction
+        audioStream.resume();
+        voiceDetector.reset();
+        
         if (bargeInEnabled) {
             log.debug("Nova finished generating, resuming normal audio flow");
         }
@@ -120,6 +124,13 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
 
     @Override
     public void onError(Exception e) {
+        log.error("Nova S2S session error", e);
+        
+        // Reset state on error
+        isNovaGenerating = false;
+        audioStream.resume();
+        voiceDetector.reset();
+        
         if (!playedErrorSound) {
             try {
                 playAudioFile(ERROR_AUDIO_FILE);
@@ -235,7 +246,7 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
      * @param audioData PCM audio data from the user
      */
     public void processUserAudio(byte[] audioData) {
-        if (!bargeInEnabled || !isNovaGenerating) {
+        if (!bargeInEnabled || !isNovaGenerating || audioStream.isInterrupted()) {
             return;
         }
         
@@ -253,13 +264,18 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         // Interrupt the audio output
         audioStream.interrupt();
         
-        // Send interruption event to Nova
+        // Send EndAudioContent event to signal interruption to Nova
+        // This is the proper way to interrupt Nova Sonic according to the API
         if (outbound != null && promptName != null) {
             try {
-                outbound.onNext(new InterruptionEvent(promptName));
-                log.info("Sent interruption event to Nova Sonic");
+                // End the current audio content to interrupt Nova's generation
+                outbound.onNext(new EndAudioContent(EndAudioContent.ContentEnd.builder()
+                        .promptName(promptName)
+                        .contentName(java.util.UUID.randomUUID().toString())
+                        .build()));
+                log.info("Sent EndAudioContent event to interrupt Nova Sonic");
             } catch (Exception e) {
-                log.error("Failed to send interruption event", e);
+                log.error("Failed to send EndAudioContent interruption event", e);
             }
         }
         
