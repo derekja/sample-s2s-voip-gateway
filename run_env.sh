@@ -1,0 +1,9 @@
+SIP_SERVER=vancouver1.voip.ms \
+SIP_USER=204449_2 \
+AUTH_USER=204449_2 \
+AUTH_PASSWORD="aReallySecure#password" \
+AUTH_REALM=vancouver1.voip.ms \
+SIP_VIA_ADDR=143.105.11.217 \
+MEDIA_ADDRESS=143.105.11.217 \
+./run.sh
+

@@ -4,3 +4,17 @@ AUTH_USER=
 AUTH_PASSWORD=
 AUTH_REALM=
 DISPLAY_NAME=
+
+# Conversation logging (optional)
+# ENABLE_CONVERSATION_LOG=true
+# CONVERSATION_LOG_FILE=conversation.log
+
+# Barge-in functionality (optional)
+# ENABLE_BARGE_IN=true
+
+# Debug options (optional)
+# DEBUG_SIP=false
+# DEBUG_AUDIO_OUTPUT=false
+# DEBUG_AUDIO_RECEIVED=false
+# DEBUG_AUDIO_SENT=false
+# DEBUG_RESPONSES=false

@@ -125,6 +125,8 @@ This project can be configured to run via the `.mjsip-ua` configuration file OR 
 * DEBUG_SIP - true|false to enable/disable logging SIP packets
 * DISPLAY_NAME - the display name to send for your SIP address
 * ENABLE_BARGE_IN - true|false to enable/disable barge-in functionality (default: true)
+* ENABLE_CONVERSATION_LOG - true|false to enable/disable conversation text logging (default: false)
+* CONVERSATION_LOG_FILE - path to the conversation log file (default: conversation.log)
 * GREETING_FILENAME - the name of the wav file to play as a greeting.  Can be an absolute path or in the classpath.
 * MEDIA_ADDRESS - the IP address to use for RTP media traffic.  By default it will source the address from your network interfaces.
 * MEDIA_PORT_BASE - the first RTP port to use for audio traffic
@@ -137,6 +139,30 @@ This project can be configured to run via the `.mjsip-ua` configuration file OR 
 * SIP_VIA_ADDR - the address to send in SIP packets for the Via field.  By default it will source the address from your network interfaces.
 
 If SIP_SERVER is set the application will pull configuration from environment variables.  If it is not set it will use the `.mjsip-ua` file.
+
+## Conversation Logging
+
+The gateway can optionally log conversation text to a file for review and analysis. This feature captures:
+
+* Nova's text responses (before they are converted to speech)
+* System events (call start/end, errors, barge-in events)
+* Timestamps for all logged events
+
+To enable conversation logging:
+1. Set `ENABLE_CONVERSATION_LOG=true`
+2. Optionally set `CONVERSATION_LOG_FILE` to specify the log file path (defaults to `conversation.log`)
+
+Example log output:
+```
+[2025-08-13 10:15:30] SYSTEM: === New conversation started ===
+[2025-08-13 10:15:30] SYSTEM: Call connected - Nova Sonic session started
+[2025-08-13 10:15:35] NOVA: Hello! How can I help you today?
+[2025-08-13 10:15:42] SYSTEM: User interrupted Nova (barge-in detected)
+[2025-08-13 10:15:45] NOVA: I understand you have a question. What would you like to know?
+[2025-08-13 10:16:00] SYSTEM: === Conversation ended ===
+```
+
+Note: In the current S2S (Speech-to-Speech) implementation, user speech is processed directly by Nova Sonic and is not transcribed to text that can be logged.
 
 ## Networking
 

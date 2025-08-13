@@ -29,6 +29,7 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     private final QueuedUlawInputStream audioStream = new QueuedUlawInputStream();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final VoiceActivityDetector voiceDetector = new VoiceActivityDetector();
+    private final ConversationLogger conversationLogger = new ConversationLogger();
     private InteractObserver<NovaSonicEvent> outbound;
     private String promptName;
     private boolean debugAudioOutput;
@@ -64,7 +65,14 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
 
     @Override
     public void handleTextOutput(JsonNode node) {
-
+        String content = node.get("content").asText();
+        String role = node.get("role").asText();
+        
+        if ("assistant".equalsIgnoreCase(role) || "ASSISTANT".equalsIgnoreCase(role)) {
+            // Log Nova's text response
+            conversationLogger.logNovaResponse(content);
+            log.debug("Logged Nova response: {}", content);
+        }
     }
 
     @Override
@@ -116,6 +124,8 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     @Override
     public void onStart() {
         log.info("Session started, playing greeting.");
+        conversationLogger.logSystemMessage("Call connected - Nova Sonic session started");
+        
         String greetingFilename = System.getenv().getOrDefault("GREETING_FILENAME","hello-how.wav");
         try { playAudioFile(greetingFilename); }
         catch (FileNotFoundException e) {
@@ -126,6 +136,7 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     @Override
     public void onError(Exception e) {
         log.error("Nova S2S session error", e);
+        conversationLogger.logSystemMessage("Error occurred: " + e.getMessage());
         
         // Reset state on error
         isNovaGenerating = false;
@@ -145,6 +156,7 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     @Override
     public void onComplete() {
         log.info("Stream complete");
+        conversationLogger.logConversationEnd();
     }
 
     @Override
@@ -254,6 +266,7 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         // Check for voice activity
         if (voiceDetector.detectVoiceActivity(audioData)) {
             log.info("Barge-in detected: User started speaking while Nova was generating");
+            conversationLogger.logSystemMessage("User interrupted Nova (barge-in detected)");
             handleBargeIn();
         }
     }
