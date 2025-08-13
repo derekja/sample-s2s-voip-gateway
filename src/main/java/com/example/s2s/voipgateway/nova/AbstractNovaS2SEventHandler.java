@@ -155,6 +155,16 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         audioStream.resume();
         voiceDetector.reset();
         
+        // Send prompt end event to properly close the session on error
+        if (outbound != null && promptName != null) {
+            log.info("Sending PromptEndEvent due to error for prompt: {}", promptName);
+            try {
+                outbound.onNext(PromptEndEvent.create(promptName));
+            } catch (Exception promptEndException) {
+                log.warn("Failed to send PromptEndEvent on error", promptEndException);
+            }
+        }
+        
         if (!playedErrorSound) {
             try {
                 playAudioFile(ERROR_AUDIO_FILE);
@@ -169,6 +179,12 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     public void onComplete() {
         log.info("Stream complete");
         conversationLogger.logConversationEnd();
+        
+        // Send prompt end event to properly close the session
+        if (outbound != null && promptName != null) {
+            log.info("Sending PromptEndEvent for prompt: {}", promptName);
+            outbound.onNext(PromptEndEvent.create(promptName));
+        }
     }
 
     @Override
