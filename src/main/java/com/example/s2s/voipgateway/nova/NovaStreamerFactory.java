@@ -58,7 +58,7 @@ public class NovaStreamerFactory implements StreamerFactory {
         String promptName = UUID.randomUUID().toString();
 
         NovaS2SBedrockInteractClient novaClient = new NovaS2SBedrockInteractClient(client, "amazon.nova-sonic-v1:0");
-        NovaS2SEventHandler eventHandler = new DateTimeNovaS2SEventHandler();
+        DateTimeNovaS2SEventHandler eventHandler = new DateTimeNovaS2SEventHandler();
 
         log.info("Using system prompt: {}", mediaConfig.getNovaPrompt());
 
