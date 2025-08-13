@@ -124,6 +124,7 @@ This project can be configured to run via the `.mjsip-ua` configuration file OR 
 * AUTH_REALM - the SIP realm to use for authentication
 * DEBUG_SIP - true|false to enable/disable logging SIP packets
 * DISPLAY_NAME - the display name to send for your SIP address
+* ENABLE_BARGE_IN - true|false to enable/disable barge-in functionality (default: true)
 * GREETING_FILENAME - the name of the wav file to play as a greeting.  Can be an absolute path or in the classpath.
 * MEDIA_ADDRESS - the IP address to use for RTP media traffic.  By default it will source the address from your network interfaces.
 * MEDIA_PORT_BASE - the first RTP port to use for audio traffic

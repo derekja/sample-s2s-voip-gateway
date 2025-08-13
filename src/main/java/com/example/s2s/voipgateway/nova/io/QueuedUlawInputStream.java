@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An InputStream backed by a queue for sending outbound ULAW audio.
@@ -23,6 +24,7 @@ public class QueuedUlawInputStream extends InputStream {
     private boolean open = true;
     private OutputStream testOutput;
     private boolean debugAudioSent = System.getenv().getOrDefault("DEBUG_AUDIO_SENT", "false").equalsIgnoreCase("true");
+    private final AtomicBoolean interrupted = new AtomicBoolean(false);
 
     /**
      * Appends PCM audio data to the queue.  The data is expected to be 8000 khz sample rate, 16 bit samples, 1 channel.
@@ -31,6 +33,10 @@ public class QueuedUlawInputStream extends InputStream {
      * @throws InterruptedException If an interrupt is thrown while appending audio data to the queue.
      */
     public void append(byte[] data) throws InterruptedException {
+        if (interrupted.get()) {
+            log.debug("Ignoring audio data due to interruption");
+            return;
+        }
         data = PcmToULawTranscoder.transcodeBytes(data);
         queue.put(data);
 
@@ -59,7 +65,7 @@ public class QueuedUlawInputStream extends InputStream {
         }
         if (open && (currentChunk == null || currentIndex >= currentChunk.length)) {
             try {
-                if (queue.isEmpty()) {
+                if (queue.isEmpty() || interrupted.get()) {
                     if (testOutput != null) {
                         testOutput.write(SILENCE);
                     }
@@ -93,6 +99,34 @@ public class QueuedUlawInputStream extends InputStream {
             testOutput.close();
             testOutput = null;
         }
+    }
+
+    /**
+     * Interrupts the current audio output and clears the queue.
+     * This is used for barge-in functionality.
+     */
+    public void interrupt() {
+        log.info("Interrupting audio output for barge-in");
+        interrupted.set(true);
+        queue.clear();
+        currentChunk = null;
+        currentIndex = -1;
+    }
+
+    /**
+     * Resumes audio output after an interruption.
+     */
+    public void resume() {
+        log.info("Resuming audio output");
+        interrupted.set(false);
+    }
+
+    /**
+     * Checks if the audio stream is currently interrupted.
+     * @return true if interrupted, false otherwise
+     */
+    public boolean isInterrupted() {
+        return interrupted.get();
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.example.s2s.voipgateway;
 import com.example.s2s.voipgateway.nova.event.NovaSonicEvent;
 import com.example.s2s.voipgateway.nova.io.NovaAudioOutputStream;
 import com.example.s2s.voipgateway.nova.observer.InteractObserver;
+import com.example.s2s.voipgateway.nova.AbstractNovaS2SEventHandler;
 import org.mjsip.media.RtpStreamReceiver;
 import org.mjsip.media.RtpStreamReceiverListener;
 import org.mjsip.media.rx.*;
@@ -23,10 +24,18 @@ public class NovaSonicAudioOutput implements AudioReceiver {
     private static final Logger LOG = LoggerFactory.getLogger(AudioFileReceiver.class);
     private final InteractObserver<NovaSonicEvent> inputObserver;
     private final String promptName;
+    private final AbstractNovaS2SEventHandler eventHandler;
 
     public NovaSonicAudioOutput(InteractObserver<NovaSonicEvent> inputObserver, String promptName) {
         this.inputObserver = inputObserver;
         this.promptName = promptName;
+        this.eventHandler = null;
+    }
+    
+    public NovaSonicAudioOutput(InteractObserver<NovaSonicEvent> inputObserver, String promptName, AbstractNovaS2SEventHandler eventHandler) {
+        this.inputObserver = inputObserver;
+        this.promptName = promptName;
+        this.eventHandler = eventHandler;
     }
 
     @Override
@@ -34,7 +43,9 @@ public class NovaSonicAudioOutput implements AudioReceiver {
                                         CodecType codec, int payload_type, RtpPayloadFormat payloadFormat,
                                         int sample_rate, int channels, Encoder additional_decoder,
                                         RtpStreamReceiverListener listener) throws IOException {
-        NovaAudioOutputStream outputStream = new NovaAudioOutputStream(inputObserver, promptName);
+        NovaAudioOutputStream outputStream = eventHandler != null ? 
+            new NovaAudioOutputStream(inputObserver, promptName, eventHandler) : 
+            new NovaAudioOutputStream(inputObserver, promptName);
         RtpStreamReceiver receiver = new RtpStreamReceiver(options, outputStream, additional_decoder, payloadFormat, socket, listener) {
             protected void onRtpStreamReceiverTerminated(Exception error) {
                 super.onRtpStreamReceiverTerminated(error);

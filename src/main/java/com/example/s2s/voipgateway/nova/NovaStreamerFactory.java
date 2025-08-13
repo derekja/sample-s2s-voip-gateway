@@ -70,7 +70,7 @@ public class NovaStreamerFactory implements StreamerFactory {
 
         eventHandler.setOutbound(inputObserver);
         AudioTransmitter tx = new NovaSonicAudioInput(eventHandler);
-        AudioReceiver rx = new NovaSonicAudioOutput(inputObserver, promptName);
+        AudioReceiver rx = new NovaSonicAudioOutput(inputObserver, promptName, eventHandler);
 
         StreamerOptions options = StreamerOptions.builder()
                 .setRandomEarlyDrop(mediaConfig.getRandomEarlyDropRate())

@@ -3,6 +3,7 @@ package com.example.s2s.voipgateway.nova;
 import com.example.s2s.voipgateway.nova.event.*;
 import com.example.s2s.voipgateway.nova.io.QueuedUlawInputStream;
 import com.example.s2s.voipgateway.nova.observer.InteractObserver;
+import com.example.s2s.voipgateway.nova.VoiceActivityDetector;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -27,10 +28,13 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     private static final String ERROR_AUDIO_FILE = "error.wav";
     private final QueuedUlawInputStream audioStream = new QueuedUlawInputStream();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final VoiceActivityDetector voiceDetector = new VoiceActivityDetector();
     private InteractObserver<NovaSonicEvent> outbound;
     private String promptName;
     private boolean debugAudioOutput;
     private boolean playedErrorSound = false;
+    private volatile boolean isNovaGenerating = false;
+    private boolean bargeInEnabled = "true".equalsIgnoreCase(System.getenv().getOrDefault("ENABLE_BARGE_IN", "true"));
 
     public AbstractNovaS2SEventHandler() {
         this(null);
@@ -46,6 +50,10 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         log.info("Completion started for node: {}", node);
         promptName = node.get("promptName").asText();
         log.info("Completion started with promptId: {}", promptName);
+        isNovaGenerating = true;
+        if (bargeInEnabled) {
+            log.debug("Nova started generating, barge-in enabled");
+        }
     }
 
     @Override
@@ -65,6 +73,13 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         if (debugAudioOutput) {
             log.info("Received audio output {} from {}", content, role);
         }
+        
+        // Don't append audio if we're interrupted
+        if (audioStream.isInterrupted()) {
+            log.debug("Skipping audio output due to interruption");
+            return;
+        }
+        
         byte[] data = decoder.decode(content);
         try {
             audioStream.append(data);
@@ -86,6 +101,11 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         log.info("Completion end for node: {}", node);
         String stopReason = node.has("stopReason") ? node.get("stopReason").asText() : "";
         log.info("Completion ended with reason: {}", stopReason);
+        isNovaGenerating = false;
+        audioStream.resume(); // Resume in case it was interrupted
+        if (bargeInEnabled) {
+            log.debug("Nova finished generating, resuming normal audio flow");
+        }
     }
 
     @Override
@@ -206,5 +226,60 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
                         .property("role", "TOOL")
                         .build())
                 .build());
+    }
+    
+    /**
+     * Processes incoming user audio for voice activity detection and barge-in.
+     * This should be called by the audio input stream when new audio data arrives.
+     * 
+     * @param audioData PCM audio data from the user
+     */
+    public void processUserAudio(byte[] audioData) {
+        if (!bargeInEnabled || !isNovaGenerating) {
+            return;
+        }
+        
+        // Check for voice activity
+        if (voiceDetector.detectVoiceActivity(audioData)) {
+            log.info("Barge-in detected: User started speaking while Nova was generating");
+            handleBargeIn();
+        }
+    }
+    
+    /**
+     * Handles barge-in when user speech is detected during Nova generation.
+     */
+    private void handleBargeIn() {
+        // Interrupt the audio output
+        audioStream.interrupt();
+        
+        // Send interruption event to Nova
+        if (outbound != null && promptName != null) {
+            try {
+                outbound.onNext(new InterruptionEvent(promptName));
+                log.info("Sent interruption event to Nova Sonic");
+            } catch (Exception e) {
+                log.error("Failed to send interruption event", e);
+            }
+        }
+        
+        // Reset voice detector
+        voiceDetector.reset();
+    }
+    
+    /**
+     * Checks if Nova is currently generating a response.
+     * @return true if Nova is generating, false otherwise
+     */
+    public boolean isNovaGenerating() {
+        return isNovaGenerating;
+    }
+    
+    /**
+     * Checks if barge-in is enabled.
+     * @return true if barge-in is enabled, false otherwise
+     */
+    public boolean isBargeInEnabled() {
+        return bargeInEnabled;
     }
 }

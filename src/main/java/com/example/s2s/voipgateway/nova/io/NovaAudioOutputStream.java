@@ -9,6 +9,7 @@ import com.example.s2s.voipgateway.nova.event.NovaSonicEvent;
 import com.example.s2s.voipgateway.nova.event.StartAudioContent;
 import com.example.s2s.voipgateway.nova.observer.InteractObserver;
 import com.example.s2s.voipgateway.nova.transcode.UlawToPcmTranscoder;
+import com.example.s2s.voipgateway.nova.AbstractNovaS2SEventHandler;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,11 +29,22 @@ public class NovaAudioOutputStream extends OutputStream {
     private boolean startSent = false;
     private OutputStream audioFileOutput;
     private boolean debugAudioReceived = System.getenv().getOrDefault("DEBUG_AUDIO_RECEIVED", "false").equalsIgnoreCase("true");
+    private AbstractNovaS2SEventHandler eventHandler;
 
     public NovaAudioOutputStream(InteractObserver<NovaSonicEvent> observer, String promptName) {
         this.observer = observer;
         this.promptName = promptName;
         this.contentName = UUID.randomUUID().toString();
+    }
+    
+    /**
+     * Constructor that accepts an event handler for barge-in functionality.
+     */
+    public NovaAudioOutputStream(InteractObserver<NovaSonicEvent> observer, String promptName, AbstractNovaS2SEventHandler eventHandler) {
+        this.observer = observer;
+        this.promptName = promptName;
+        this.contentName = UUID.randomUUID().toString();
+        this.eventHandler = eventHandler;
     }
 
     @Override
@@ -53,6 +65,11 @@ public class NovaAudioOutputStream extends OutputStream {
         byte[] pcmData = UlawToPcmTranscoder.convertByteArray(b);
         if (audioFileOutput != null) {
             audioFileOutput.write(pcmData);
+        }
+        
+        // Process audio for barge-in detection if event handler is available
+        if (eventHandler != null) {
+            eventHandler.processUserAudio(pcmData);
         }
 
         observer.onNext(new AudioInputEvent(AudioInputEvent.AudioInput.builder()
