@@ -10,3 +10,5 @@ cdk.context.json
 node_modules
 .vscode
 run_env.sh
+runmain_env.sh
+

@@ -12,6 +12,7 @@ import org.mjsip.sip.message.SipMessage;
 import org.mjsip.sip.provider.SipConfig;
 import org.mjsip.sip.provider.SipKeepAlive;
 import org.mjsip.sip.provider.SipProvider;
+import org.mjsip.sip.provider.SipProviderListener;
 import org.mjsip.sip.provider.SipStack;
 import org.mjsip.time.ConfiguredScheduler;
 import org.mjsip.time.SchedulerConfig;
@@ -168,6 +169,7 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
             uaConfig.setMediaAddr(environ.get("MEDIA_ADDRESS"));
         }
         uaConfig.setKeepAliveTime(Long.parseLong(environ.getOrDefault("SIP_KEEPALIVE_TIME","60000")));
+        uaConfig.setRegister(true);
         uaConfig.setNoPrompt(true);
         mediaConfig.setMediaDescs(createDefaultMediaDescs());
         if (isConfigured(environ.get("MEDIA_PORT_BASE"))) {
