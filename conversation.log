@@ -1,0 +1,57 @@
+[2025-08-23 20:49:44] SYSTEM: === New conversation started ===
+[2025-08-23 20:49:46] SYSTEM: Call connected - Nova Sonic session started
+[2025-08-23 20:49:51] NOVA: Ahoy matey! I can talk about a myriad of topics, arrgh.
+[2025-08-23 20:49:53] NOVA: We can chat about the seven seas, the stars in the sky, tales of adventure, or even some landlubber stuff like cooking
+[2025-08-23 20:49:55] NOVA: or music. Just let me know what interests ye, and we'll set sail on a journey of words, arrgh!
+[2025-08-23 20:49:57] NOVA: Ahoy matey! I can talk about a myriad of topics, arrgh.
+[2025-08-23 20:50:03] NOVA: We can chat about the seven seas, the stars in the sky, tales of adventure, or even some landlubber stuff like cooking
+[2025-08-23 20:50:09] NOVA: or music. Just let me know what interests ye, and we'll set sail on a journey of words, arrgh!
+[2025-08-23 20:50:15] SYSTEM: Error occurred: software.amazon.awssdk.services.bedrockruntime.model.ValidationException: RequestId=0a447887-cd20-4765-b3e5-abc9e691f9cf : Error(s):
+Error 1 : The following prompts were not closed: [58f4c6fd-4ed0-42a2-bc90-a0b845da4d5c]
+ (Service: bedrock, Status Code: 400, Request ID: 0a447887-cd20-4765-b3e5-abc9e691f9cf)
+[2025-08-23 20:50:15] SYSTEM: Error occurred: software.amazon.awssdk.services.bedrockruntime.model.ValidationException: RequestId=0a447887-cd20-4765-b3e5-abc9e691f9cf : Error(s):
+Error 1 : The following prompts were not closed: [58f4c6fd-4ed0-42a2-bc90-a0b845da4d5c]
+ (Service: bedrock, Status Code: 400, Request ID: 0a447887-cd20-4765-b3e5-abc9e691f9cf)
+[2025-08-23 20:50:15] SYSTEM: Error occurred: java.util.concurrent.CompletionException: software.amazon.awssdk.services.bedrockruntime.model.ValidationException: RequestId=0a447887-cd20-4765-b3e5-abc9e691f9cf : Error(s):
+Error 1 : The following prompts were not closed: [58f4c6fd-4ed0-42a2-bc90-a0b845da4d5c]
+ (Service: bedrock, Status Code: 400, Request ID: 0a447887-cd20-4765-b3e5-abc9e691f9cf) (SDK Attempt Count: 1)
+[2025-08-23 20:56:38] SYSTEM: === New conversation started ===
+[2025-08-23 20:56:40] SYSTEM: Call connected - Nova Sonic session started
+[2025-08-23 20:56:48] NOVA: Arrgh, matey! Cookin' a falafel can be a bit of a challenge, but I'll give ye some tips.
+[2025-08-23 20:56:50] NOVA: First, ye'll need chickpeas, onions, garlic, and some herbs like parsley and cilantro.
+[2025-08-23 20:56:52] NOVA: Grind the chickpeas with the herbs and spices in a food processor, then mix in the onions and garlic.
+[2025-08-23 20:56:53] NOVA: Form the mixture into balls or patties and deep fry 'em until they're golden brown.
+[2025-08-23 20:56:54] NOVA: Serve with pita, tahini sauce, and a side of veggies.
+[2025-08-23 20:56:54] NOVA: Arrgh, matey! Cookin' a falafel can be a bit of a challenge, but I'll give ye some tips.
+[2025-08-23 20:56:54] NOVA: { "interrupted" : true }
+[2025-08-23 20:56:54] NOVA: First, ye'll need chickpeas, onions, garlic, and some herbs like parsley and cilantro.
+[2025-08-23 20:56:54] SYSTEM: User interrupted Nova (barge-in detected)
+[2025-08-23 20:56:56] NOVA: Arrgh, cookin' on a fire, eh?  That's a bit trickier, but not impossible.
+[2025-08-23 20:56:58] NOVA: Ye'll need a cast-iron skillet or a grill pan to cook the falafel patties.
+[2025-08-23 20:57:00] NOVA: Heat the pan over the fire until it's nice and hot, then add a bit of oil.
+[2025-08-23 20:57:01] NOVA: Drop in the falafel patties and cook 'em until they're golden brown on both sides.
+[2025-08-23 20:57:02] NOVA: Arrgh, cookin' on a fire, eh?  That's a bit trickier, but not impossible.
+[2025-08-23 20:57:06] NOVA: Ye'll need a cast-iron skillet or a grill pan to cook the falafel patties.
+[2025-08-23 20:57:07] SYSTEM: User interrupted Nova (barge-in detected)
+[2025-08-23 20:57:08] NOVA: { "interrupted" : true }
+[2025-08-23 20:57:08] NOVA: Heat the pan over the fire until it's nice and hot, then add a bit of oil.
+[2025-08-23 20:57:11] NOVA: Arrgh, aluminum foil won't work for cookin' on a fire, matey.
+[2025-08-23 20:57:12] NOVA: Ye'll need a metal pan to cook the falafel.   If ye don't have a cast-iron skillet or grill pan, ye might try
+[2025-08-23 20:57:14] NOVA: usin' a metal pie dish or a muffin tin.
+[2025-08-23 20:57:15] NOVA: Arrgh, aluminum foil won't work for cookin' on a fire, matey.
+[2025-08-23 20:57:20] NOVA: Ye'll need a metal pan to cook the falafel.   If ye don't have a cast-iron skillet or grill pan, ye might try
+[2025-08-23 20:57:23] NOVA: usin' a metal pie dish or a muffin tin.
+[2025-08-23 20:57:41] NOVA: Arrgh, a stick can work for cookin' on a fire, but it won't be as effective as a metal pan.
+[2025-08-23 20:57:43] NOVA: Ye can try usin' the stick to hold the falafel patties over the fire, but they might not cook evenly.
+[2025-08-23 20:57:45] NOVA: If ye have a metal pan, that would be the best option.
+[2025-08-23 20:57:47] NOVA: Arrgh, a stick can work for cookin' on a fire, but it won't be as effective as a metal pan.
+[2025-08-23 20:57:52] NOVA: Ye can try usin' the stick to hold the falafel patties over the fire, but they might not cook evenly.
+[2025-08-23 20:57:58] SYSTEM: Error occurred: software.amazon.awssdk.services.bedrockruntime.model.ValidationException: RequestId=698425d2-6a5c-4e81-b282-d7fe6fd392b4 : Error(s):
+Error 1 : The following prompts were not closed: [d3af2ce6-f6e0-490a-a705-7ab752c0ce43]
+ (Service: bedrock, Status Code: 400, Request ID: 698425d2-6a5c-4e81-b282-d7fe6fd392b4)
+[2025-08-23 20:57:58] SYSTEM: Error occurred: software.amazon.awssdk.services.bedrockruntime.model.ValidationException: RequestId=698425d2-6a5c-4e81-b282-d7fe6fd392b4 : Error(s):
+Error 1 : The following prompts were not closed: [d3af2ce6-f6e0-490a-a705-7ab752c0ce43]
+ (Service: bedrock, Status Code: 400, Request ID: 698425d2-6a5c-4e81-b282-d7fe6fd392b4)
+[2025-08-23 20:57:58] SYSTEM: Error occurred: java.util.concurrent.CompletionException: software.amazon.awssdk.services.bedrockruntime.model.ValidationException: RequestId=698425d2-6a5c-4e81-b282-d7fe6fd392b4 : Error(s):
+Error 1 : The following prompts were not closed: [d3af2ce6-f6e0-490a-a705-7ab752c0ce43]
+ (Service: bedrock, Status Code: 400, Request ID: 698425d2-6a5c-4e81-b282-d7fe6fd392b4) (SDK Attempt Count: 1)
