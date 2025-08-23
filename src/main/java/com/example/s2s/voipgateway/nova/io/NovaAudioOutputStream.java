@@ -6,10 +6,13 @@ import com.example.s2s.voipgateway.constants.SonicAudioTypes;
 import com.example.s2s.voipgateway.nova.event.AudioInputEvent;
 import com.example.s2s.voipgateway.nova.event.EndAudioContent;
 import com.example.s2s.voipgateway.nova.event.NovaSonicEvent;
+import com.example.s2s.voipgateway.nova.event.PromptEndEvent;
 import com.example.s2s.voipgateway.nova.event.StartAudioContent;
 import com.example.s2s.voipgateway.nova.observer.InteractObserver;
 import com.example.s2s.voipgateway.nova.transcode.UlawToPcmTranscoder;
 import com.example.s2s.voipgateway.nova.AbstractNovaS2SEventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +25,7 @@ import java.util.UUID;
  * Abstracts Nova S2S outbound audio as an OutputStream.
  */
 public class NovaAudioOutputStream extends OutputStream {
+    private static final Logger log = LoggerFactory.getLogger(NovaAudioOutputStream.class);
     private final InteractObserver<NovaSonicEvent> observer;
     private final Base64.Encoder encoder = Base64.getEncoder();
     private final String promptName;
@@ -113,6 +117,9 @@ public class NovaAudioOutputStream extends OutputStream {
 
     @Override
     public void close() throws IOException {
+        log.debug("Closing NovaAudioOutputStream for prompt: {}", promptName);
+        
+        // Send end audio content event first
         observer.onNext(new EndAudioContent(EndAudioContent.ContentEnd.builder()
                 .promptName(promptName)
                 .contentName(contentName)
@@ -123,10 +130,21 @@ public class NovaAudioOutputStream extends OutputStream {
             eventHandler.clearCurrentUserContentName();
         }
         
+        // Send prompt end event BEFORE calling onComplete to ensure proper cleanup
+        // This prevents the "prompts were not closed" validation error
+        try {
+            log.info("Sending PromptEndEvent on stream close for prompt: {}", promptName);
+            observer.onNext(PromptEndEvent.create(promptName));
+        } catch (Exception e) {
+            log.warn("Failed to send PromptEndEvent on stream close", e);
+        }
+        
         if (audioFileOutput!=null) {
             audioFileOutput.close();
             audioFileOutput=null;
         }
+        
+        // Call onComplete after sending PromptEndEvent
         observer.onComplete();
     }
 }

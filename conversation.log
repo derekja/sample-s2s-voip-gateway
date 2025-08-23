@@ -55,3 +55,22 @@ Error 1 : The following prompts were not closed: [d3af2ce6-f6e0-490a-a705-7ab752
 [2025-08-23 20:57:58] SYSTEM: Error occurred: java.util.concurrent.CompletionException: software.amazon.awssdk.services.bedrockruntime.model.ValidationException: RequestId=698425d2-6a5c-4e81-b282-d7fe6fd392b4 : Error(s):
 Error 1 : The following prompts were not closed: [d3af2ce6-f6e0-490a-a705-7ab752c0ce43]
  (Service: bedrock, Status Code: 400, Request ID: 698425d2-6a5c-4e81-b282-d7fe6fd392b4) (SDK Attempt Count: 1)
+[2025-08-23 21:10:19] SYSTEM: === New conversation started ===
+[2025-08-23 21:10:21] SYSTEM: Call connected - Nova Sonic session started
+[2025-08-23 21:10:25] SYSTEM: User interrupted Nova (barge-in detected)
+[2025-08-23 21:10:26] SYSTEM: User interrupted Nova (barge-in detected)
+[2025-08-23 21:10:29] NOVA: Ahoy there, matey! To cook falafel on a fire, you'll want to start by preparing your falafel mixture and shaping it into patties.
+[2025-08-23 21:10:32] NOVA: Then, you'll need a grill or a cast-iron skillet to cook them over the fire.
+[2025-08-23 21:10:32] NOVA: Keep an eye on them and turn them regularly to ensure they cook evenly.
+[2025-08-23 21:10:34] NOVA: Bon appétit, arrgh!
+[2025-08-23 21:10:35] SYSTEM: User interrupted Nova (barge-in detected)
+[2025-08-23 21:10:35] NOVA: { "interrupted" : true }
+[2025-08-23 21:10:35] NOVA: Ahoy there, matey! To cook falafel on a fire, you'll want to start by preparing your falafel mixture and shaping it into patties.
+[2025-08-23 21:10:39] NOVA: Arrgh, no worries! You can still cook those tasty falafels.
+[2025-08-23 21:10:40] NOVA: First, gather some dry wood to build a fire. Once the fire is going, you can use your stick to
+[2025-08-23 21:10:41] NOVA: skewer the falafel patties and hold them over the flames.
+[2025-08-23 21:10:42] NOVA: Rotate them to cook evenly on all sides. Just be careful not to let them burn!
+[2025-08-23 21:10:43] NOVA: Arrgh, no worries! You can still cook those tasty falafels.
+[2025-08-23 21:10:47] NOVA: First, gather some dry wood to build a fire. Once the fire is going, you can use your stick to
+[2025-08-23 21:10:50] SYSTEM: === Conversation ended ===
+[2025-08-23 21:10:50] SYSTEM: 
