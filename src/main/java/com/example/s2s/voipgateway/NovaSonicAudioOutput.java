@@ -4,6 +4,7 @@ import com.example.s2s.voipgateway.nova.event.NovaSonicEvent;
 import com.example.s2s.voipgateway.nova.io.NovaAudioOutputStream;
 import com.example.s2s.voipgateway.nova.observer.InteractObserver;
 import com.example.s2s.voipgateway.nova.AbstractNovaS2SEventHandler;
+import com.example.s2s.voipgateway.nova.ContentLifecycleManager;
 import org.mjsip.media.RtpStreamReceiver;
 import org.mjsip.media.RtpStreamReceiverListener;
 import org.mjsip.media.rx.*;
@@ -25,17 +26,20 @@ public class NovaSonicAudioOutput implements AudioReceiver {
     private final InteractObserver<NovaSonicEvent> inputObserver;
     private final String promptName;
     private final AbstractNovaS2SEventHandler eventHandler;
+    private final ContentLifecycleManager lifecycleManager;
 
-    public NovaSonicAudioOutput(InteractObserver<NovaSonicEvent> inputObserver, String promptName) {
+    public NovaSonicAudioOutput(InteractObserver<NovaSonicEvent> inputObserver, String promptName, ContentLifecycleManager lifecycleManager) {
         this.inputObserver = inputObserver;
         this.promptName = promptName;
         this.eventHandler = null;
+        this.lifecycleManager = lifecycleManager;
     }
-    
-    public NovaSonicAudioOutput(InteractObserver<NovaSonicEvent> inputObserver, String promptName, AbstractNovaS2SEventHandler eventHandler) {
+
+    public NovaSonicAudioOutput(InteractObserver<NovaSonicEvent> inputObserver, String promptName, AbstractNovaS2SEventHandler eventHandler, ContentLifecycleManager lifecycleManager) {
         this.inputObserver = inputObserver;
         this.promptName = promptName;
         this.eventHandler = eventHandler;
+        this.lifecycleManager = lifecycleManager;
     }
 
     @Override
@@ -43,9 +47,9 @@ public class NovaSonicAudioOutput implements AudioReceiver {
                                         CodecType codec, int payload_type, RtpPayloadFormat payloadFormat,
                                         int sample_rate, int channels, Encoder additional_decoder,
                                         RtpStreamReceiverListener listener) throws IOException {
-        NovaAudioOutputStream outputStream = eventHandler != null ? 
-            new NovaAudioOutputStream(inputObserver, promptName, eventHandler) : 
-            new NovaAudioOutputStream(inputObserver, promptName);
+        NovaAudioOutputStream outputStream = eventHandler != null ?
+            new NovaAudioOutputStream(inputObserver, promptName, eventHandler, lifecycleManager) :
+            new NovaAudioOutputStream(inputObserver, promptName, lifecycleManager);
         RtpStreamReceiver receiver = new RtpStreamReceiver(options, outputStream, additional_decoder, payloadFormat, socket, listener) {
             protected void onRtpStreamReceiverTerminated(Exception error) {
                 super.onRtpStreamReceiverTerminated(error);

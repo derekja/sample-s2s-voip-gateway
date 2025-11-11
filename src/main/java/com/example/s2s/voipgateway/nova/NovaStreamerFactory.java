@@ -69,8 +69,9 @@ public class NovaStreamerFactory implements StreamerFactory {
                 eventHandler);
 
         eventHandler.setOutbound(inputObserver);
+        eventHandler.setLifecycleManager(novaClient.getLifecycleManager());
         AudioTransmitter tx = new NovaSonicAudioInput(eventHandler);
-        AudioReceiver rx = new NovaSonicAudioOutput(inputObserver, promptName, eventHandler);
+        AudioReceiver rx = new NovaSonicAudioOutput(inputObserver, promptName, eventHandler, novaClient.getLifecycleManager());
 
         StreamerOptions options = StreamerOptions.builder()
                 .setRandomEarlyDrop(mediaConfig.getRandomEarlyDropRate())

@@ -22,10 +22,12 @@ public class NovaS2SBedrockInteractClient {
     private static final Logger log = LoggerFactory.getLogger(NovaS2SBedrockInteractClient.class);
     private final BedrockRuntimeAsyncClient bedrockClient;
     private String modelId;
+    private final ContentLifecycleManager lifecycleManager;
 
     public NovaS2SBedrockInteractClient(BedrockRuntimeAsyncClient bedrockClient, String modelId) {
         this.bedrockClient = bedrockClient;
         this.modelId = modelId;
+        this.lifecycleManager = new ContentLifecycleManager();
     }
 
     /**
@@ -76,14 +78,34 @@ public class NovaS2SBedrockInteractClient {
         inputObserver.onNext(promptStartEvent);
 
         log.info("Sending system prompt ...");
-        inputObserver.onNext(ContentStartEvent.createTextContentStart(systemPrompt.getTextInput().getPromptName(),
-                systemPrompt.getTextInput().getContentName()));
-        inputObserver.onNext(systemPrompt);
-        inputObserver.onNext(ContentEndEvent.create(systemPrompt.getTextInput().getPromptName(),
-                systemPrompt.getTextInput().getContentName()));
+        String systemContentName = systemPrompt.getTextInput().getContentName();
+
+        // Register content lifecycle with manager
+        if (lifecycleManager.registerContentStart(systemContentName)) {
+            inputObserver.onNext(ContentStartEvent.createTextContentStart(systemPrompt.getTextInput().getPromptName(),
+                    systemContentName));
+            lifecycleManager.markContentActive(systemContentName);
+
+            inputObserver.onNext(systemPrompt);
+
+            // End content lifecycle
+            if (lifecycleManager.registerContentEnd(systemContentName)) {
+                inputObserver.onNext(ContentEndEvent.create(systemPrompt.getTextInput().getPromptName(),
+                        systemContentName));
+                lifecycleManager.markContentClosed(systemContentName);
+            }
+        }
 
 
         log.info("Input observer ready");
         return inputObserver;
+    }
+
+    /**
+     * Gets the content lifecycle manager for this client.
+     * @return the content lifecycle manager
+     */
+    public ContentLifecycleManager getLifecycleManager() {
+        return lifecycleManager;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.s2s.voipgateway;
 
 import com.example.s2s.voipgateway.nova.NovaStreamerFactory;
+import com.example.s2s.voipgateway.sip.SipMonitor;
 import org.mjsip.config.OptionParser;
 import org.mjsip.media.MediaDesc;
 import org.mjsip.media.MediaSpec;
@@ -35,6 +36,7 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
     private StreamerFactory streamerFactory;
     private RegistrationClient _rc;
     private SipKeepAlive keep_alive;
+    private SipMonitor sipMonitor;
 
     // *************************** Public methods **************************
 
@@ -47,6 +49,8 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
         this.mediaConfig = mediaConfig;
         this.uaConfig = uaConfig;
         streamerFactory = new NovaStreamerFactory(this.mediaConfig);
+        sipMonitor = new SipMonitor();
+        sipMonitor.start();
         registerWithKeepAlive();
     }
 
@@ -63,10 +67,21 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
     public void registerWithKeepAlive() {
         LOG.info("Registering with {}...", this.uaConfig.getRegistrar());
         if (this.uaConfig.isRegister()) {
+            sipMonitor.recordRegistrationAttempt();
             this._rc = new RegistrationClient(this.sip_provider, this.uaConfig, this);
             this._rc.loopRegister(this.uaConfig);
         }
         scheduleKeepAlive(uaConfig.getKeepAliveTime());
+    }
+
+    // Registration event handlers - integrated with SipMonitor
+    public void onRegistrationSuccess(RegistrationClient rc, NameAddress target, NameAddress contact, String result) {
+        sipMonitor.recordRegistrationSuccess();
+        LOG.info("Registration successful: {}", result);
+    }
+
+    public void onRegistrationFailure(RegistrationClient rc, NameAddress target, NameAddress contact, String result) {
+        LOG.warn("Registration failed: {}", result);
     }
 
     private void scheduleKeepAlive(long keepAliveTime) {
@@ -85,6 +100,7 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
 
             this.keep_alive = new SipKeepAlive(this.sip_provider, targetSoAddr, (SipMessage)null, keepAliveTime);
             LOG.info("Keep-alive started");
+            sipMonitor.recordKeepAlive();
         }
     }
 
@@ -96,6 +112,12 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
             this._rc.halt();
             this._rc = null;
         }
+
+        // Stop SIP monitor
+        if (sipMonitor != null) {
+            sipMonitor.stop();
+            sipMonitor = null;
+        }
     }
 
     @Override
@@ -105,8 +127,20 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
             @Override
             public void onUaIncomingCall(UserAgent ua, NameAddress callee, NameAddress caller,
                                          MediaDesc[] media_descs) {
-                LOG.info("Incomming call from: {}", callee.getAddress());
+                LOG.info("Incoming call from: {}", caller.getAddress());
+                sipMonitor.recordIncomingCall();
                 ua.accept(new MediaAgent(mediaConfig.getMediaDescs(), streamerFactory));
+                sipMonitor.recordSuccessfulCall();
+            }
+
+            public void onUaCallCancelled(UserAgent ua) {
+                LOG.info("Call cancelled");
+                sipMonitor.recordFailedCall();
+            }
+
+            public void onUaCallFailed(UserAgent ua) {
+                LOG.info("Call failed");
+                sipMonitor.recordFailedCall();
             }
         };
     }

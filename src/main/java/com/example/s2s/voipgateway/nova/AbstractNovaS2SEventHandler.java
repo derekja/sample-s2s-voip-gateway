@@ -4,6 +4,7 @@ import com.example.s2s.voipgateway.nova.event.*;
 import com.example.s2s.voipgateway.nova.io.QueuedUlawInputStream;
 import com.example.s2s.voipgateway.nova.observer.InteractObserver;
 import com.example.s2s.voipgateway.nova.VoiceActivityDetector;
+import com.example.s2s.voipgateway.nova.ContentLifecycleManager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     private volatile boolean isNovaGenerating = false;
     private boolean bargeInEnabled = "true".equalsIgnoreCase(System.getenv().getOrDefault("ENABLE_BARGE_IN", "true"));
     private volatile String currentUserContentName = null;
+    private ContentLifecycleManager lifecycleManager;
 
     public AbstractNovaS2SEventHandler() {
         this(null);
@@ -154,6 +156,11 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
         isNovaGenerating = false;
         audioStream.resume();
         voiceDetector.reset();
+
+        // Clean up any remaining content in lifecycle manager
+        if (lifecycleManager != null) {
+            lifecycleManager.forceCleanupAll();
+        }
         
         // Send prompt end event to properly close the session on error
         if (outbound != null && promptName != null) {
@@ -198,6 +205,14 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
     }
 
     /**
+     * Sets the content lifecycle manager for this event handler.
+     * @param lifecycleManager the content lifecycle manager
+     */
+    public void setLifecycleManager(ContentLifecycleManager lifecycleManager) {
+        this.lifecycleManager = lifecycleManager;
+    }
+
+    /**
      * Handles the actual invocation of a tool.
      * @param toolUseId The tool use id.
      * @param toolName The tool name.
@@ -221,9 +236,24 @@ public abstract class AbstractNovaS2SEventHandler implements NovaS2SEventHandler
             toolResult.put("role", "TOOL");
             toolResult.put("content", objectMapper.writeValueAsString(contentNode)); // Ensure proper escaping
 
-            sendToolContentStart(toolUseId, contentName);
-            outbound.onNext(toolResultEvent);
-            outbound.onNext(ContentEndEvent.create(promptName, contentName));
+            // Register tool content lifecycle
+            if (lifecycleManager != null && lifecycleManager.registerContentStart(contentName)) {
+                sendToolContentStart(toolUseId, contentName);
+                lifecycleManager.markContentActive(contentName);
+
+                outbound.onNext(toolResultEvent);
+
+                // End tool content lifecycle
+                if (lifecycleManager.registerContentEnd(contentName)) {
+                    outbound.onNext(ContentEndEvent.create(promptName, contentName));
+                    lifecycleManager.markContentClosed(contentName);
+                }
+            } else {
+                // Fallback for when no lifecycle manager is available
+                sendToolContentStart(toolUseId, contentName);
+                outbound.onNext(toolResultEvent);
+                outbound.onNext(ContentEndEvent.create(promptName, contentName));
+            }
         } catch (Exception e) {
             throw new RuntimeException("Error creating JSON payload for toolResult", e);
         }

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console appender for normal application logs -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Separate appender for SIP-related logs with filtering -->
+    <appender name="SIP_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SIP_MALFORMED</marker>
+            </evaluator>
+            <onMismatch>NEUTRAL</onMismatch>
+            <onMatch>DENY</onMatch>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [SIP] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File appender for detailed SIP debugging (when enabled) -->
+    <appender name="SIP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/sip-debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/sip-debug.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Reduce noise from mjSIP parsing errors -->
+    <logger name="org.mjsip.sip.message" level="WARN" additivity="false">
+        <appender-ref ref="SIP_CONSOLE"/>
+        <if condition='property("DEBUG_SIP").contains("true")'>
+            <then>
+                <appender-ref ref="SIP_FILE"/>
+            </then>
+        </if>
+    </logger>
+
+    <!-- Reduce noise from mjSIP provider errors for malformed messages -->
+    <logger name="org.mjsip.sip.provider" level="WARN" additivity="false">
+        <appender-ref ref="SIP_CONSOLE"/>
+        <if condition='property("DEBUG_SIP").contains("true")'>
+            <then>
+                <appender-ref ref="SIP_FILE"/>
+            </then>
+        </if>
+    </logger>
+
+    <!-- Our custom SIP filter gets INFO level -->
+    <logger name="com.example.s2s.voipgateway.sip.SipMessageFilter" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Application loggers -->
+    <logger name="com.example.s2s.voipgateway" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- AWS SDK can be noisy, reduce to WARN unless debugging -->
+    <logger name="software.amazon.awssdk" level="WARN"/>
+    <logger name="org.apache.http" level="WARN"/>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- Conditional SIP debugging based on environment variable -->
+    <if condition='property("DEBUG_SIP").contains("true")'>
+        <then>
+            <logger name="org.mjsip" level="DEBUG" additivity="false">
+                <appender-ref ref="SIP_FILE"/>
+                <appender-ref ref="SIP_CONSOLE"/>
+            </logger>
+        </then>
+        <else>
+            <logger name="org.mjsip" level="WARN" additivity="false">
+                <appender-ref ref="SIP_CONSOLE"/>
+            </logger>
+        </else>
+    </if>
+</configuration>
