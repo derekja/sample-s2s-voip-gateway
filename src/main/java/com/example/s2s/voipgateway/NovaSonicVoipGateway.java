@@ -133,14 +133,24 @@ public class NovaSonicVoipGateway extends RegisteringMultipleUAS {
                 sipMonitor.recordSuccessfulCall();
             }
 
+            @Override
             public void onUaCallCancelled(UserAgent ua) {
                 LOG.info("Call cancelled");
                 sipMonitor.recordFailedCall();
+                ua.hangup();  // Release media ports back to the pool
             }
 
-            public void onUaCallFailed(UserAgent ua) {
-                LOG.info("Call failed");
+            @Override
+            public void onUaCallFailed(UserAgent ua, String reason) {
+                LOG.info("Call failed: {}", reason);
                 sipMonitor.recordFailedCall();
+                ua.hangup();  // Release media ports back to the pool
+            }
+
+            @Override
+            public void onUaCallClosed(UserAgent ua) {
+                LOG.info("Call closed");
+                // Ports are released by UserAgent.closeMediaSessions() via onCallBye
             }
         };
     }

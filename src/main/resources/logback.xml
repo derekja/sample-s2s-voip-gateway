@@ -38,21 +38,11 @@
     <!-- Reduce noise from mjSIP parsing errors -->
     <logger name="org.mjsip.sip.message" level="WARN" additivity="false">
         <appender-ref ref="SIP_CONSOLE"/>
-        <if condition='property("DEBUG_SIP").contains("true")'>
-            <then>
-                <appender-ref ref="SIP_FILE"/>
-            </then>
-        </if>
     </logger>
 
     <!-- Reduce noise from mjSIP provider errors for malformed messages -->
     <logger name="org.mjsip.sip.provider" level="WARN" additivity="false">
         <appender-ref ref="SIP_CONSOLE"/>
-        <if condition='property("DEBUG_SIP").contains("true")'>
-            <then>
-                <appender-ref ref="SIP_FILE"/>
-            </then>
-        </if>
     </logger>
 
     <!-- Our custom SIP filter gets INFO level -->
@@ -74,18 +64,8 @@
         <appender-ref ref="CONSOLE"/>
     </root>
 
-    <!-- Conditional SIP debugging based on environment variable -->
-    <if condition='property("DEBUG_SIP").contains("true")'>
-        <then>
-            <logger name="org.mjsip" level="DEBUG" additivity="false">
-                <appender-ref ref="SIP_FILE"/>
-                <appender-ref ref="SIP_CONSOLE"/>
-            </logger>
-        </then>
-        <else>
-            <logger name="org.mjsip" level="WARN" additivity="false">
-                <appender-ref ref="SIP_CONSOLE"/>
-            </logger>
-        </else>
-    </if>
+    <!-- SIP debugging (set to WARN by default, change to DEBUG if needed) -->
+    <logger name="org.mjsip" level="WARN" additivity="false">
+        <appender-ref ref="SIP_CONSOLE"/>
+    </logger>
 </configuration>

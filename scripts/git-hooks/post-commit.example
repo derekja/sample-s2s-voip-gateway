@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Git Post-Commit Hook for SESSION_CONTEXT.md Auto-Update
+# Installation: cp scripts/git-hooks/post-commit.example .git/hooks/post-commit
+# Make executable: chmod +x .git/hooks/post-commit
+
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT_PATH="$PROJECT_ROOT/scripts/update-session-context.sh"
+
+# Get commit message and files changed
+COMMIT_MSG=$(git log -1 --pretty=format:"%s")
+FILES_CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD)
+
+# Update SESSION_CONTEXT.md with commit information
+if [ -f "$SCRIPT_PATH" ]; then
+    "$SCRIPT_PATH" "git-commit" "Code committed: $COMMIT_MSG"
+
+    # Optionally add the changed files to context
+    {
+        echo ""
+        echo "**Files Changed in Last Commit:**"
+        echo '```'
+        echo "$FILES_CHANGED"
+        echo '```'
+        echo ""
+    } >> "$PROJECT_ROOT/SESSION_CONTEXT.md"
+fi
+
+echo "SESSION_CONTEXT.md updated with commit information"

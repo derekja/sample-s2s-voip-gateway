@@ -50,3 +50,58 @@ Then AUTOMATICALLY:
 ```
 
 **Goal**: Ensure every Claude session has full context and maintains project continuity through SESSION_CONTEXT.md.
+
+## 4. AUTO-UPDATE SESSION_CONTEXT.md Template
+**AUTOMATED EXECUTION**: For EVERY issue resolved, error fixed, or significant task completed, IMMEDIATELY append this section to SESSION_CONTEXT.md:
+
+```markdown
+## New Issue Investigation - [Current Date]
+
+### Current Error: [Brief Description] ✅ FIXED/🔄 IN_PROGRESS/❌ FAILED
+**Error Details:**
+```
+[Paste relevant error messages, log entries, or symptoms]
+```
+
+### Analysis Results ✅ COMPLETED
+**Root Cause Identified:**
+- **Issue**: [Technical description of what was wrong]
+- **Location**: [File paths and line numbers where issue was found]
+- **Cause**: [Underlying reason for the issue]
+- **Impact**: [How this affected the application]
+
+**Files Analyzed:**
+- [List each file examined with brief description]
+
+### Solution Implementation ✅ COMPLETED
+**Fix Applied:**
+- [Bullet points describing what was changed]
+
+**Changes Made:**
+```[language]
+[Show before/after code snippets if applicable]
+```
+
+**Files Modified:**
+- [List of modified files with description of changes]
+
+### Validation Results ✅ VERIFIED
+**Application Status After Fix:**
+- ✅ [Specific verification of fix working]
+- ✅ [Test results or operational confirmation]
+
+## Notes Update
+- **[Current Date] Update**: [One-line summary of what was fixed]
+```
+
+## 5. Automatic Context Triggers
+**EXECUTE AUTO-UPDATE when detecting these patterns in conversation:**
+- Error messages, stack traces, or exception details
+- Successful completion of debugging or troubleshooting
+- Implementation of fixes or code changes
+- Application restart or deployment activities
+- PM2 process management activities
+- Log file analysis or error investigation
+- "fixed", "resolved", "working", "completed", "issue solved"
+
+**ALWAYS** update SESSION_CONTEXT.md immediately after resolving any issue, no matter how small.

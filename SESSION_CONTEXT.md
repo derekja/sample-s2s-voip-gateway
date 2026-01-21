@@ -215,8 +215,70 @@ INFO: [id: 0xd2dc1d87, L:/172.31.17.53:49020 - R:bedrock-runtime.us-east-1.amazo
 - When stream resets stop, RST_STREAM messages should disappear
 - **This error should resolve automatically** with the prompt lifecycle fix
 
+## New Issue Investigation - November 12, 2025
+
+### Current Error: Logback Configuration EmptyStackException ✅ FIXED
+**Error Details:**
+```
+java.util.EmptyStackException
+    at java.base/java.util.Stack.peek(Stack.java:101)
+    at ch.qos.logback.core.model.processor.ModelInterpretationContext.peekModel(ModelInterpretationContext.java:114)
+    at ch.qos.logback.core.model.processor.conditional.ElseModelHandler.handle(ElseModelHandler.java:45)
+```
+
+### Analysis Results ✅ COMPLETED
+**Root Cause Identified:**
+- **Issue**: Conditional `<if>`, `<then>`, and `<else>` blocks in logback.xml configuration causing parsing failures
+- **Location**: `src/main/resources/logback.xml:41-45, 51-55, 78-90`
+- **Cause**: Conditional elements require additional dependencies (Janino library) and can cause EmptyStackException during XML parsing
+- **Impact**: Application failed to start due to logback configuration error
+
+**Files Analyzed:**
+- `src/main/resources/logback.xml` - Contains problematic conditional blocks
+- `target/classes/logback.xml` - Runtime configuration location
+- `/home/ec2-user/.pm2/logs/run-error.log` - Error stack traces
+
+### Solution Implementation ✅ COMPLETED
+**Fix Applied:**
+- **Removed all conditional blocks** from logback configuration
+- **Simplified configuration** to use only standard logback elements
+- **Maintained logging functionality** while eliminating parsing issues
+
+**Changes Made:**
+```xml
+<!-- BEFORE: Conditional blocks causing issues -->
+<if condition='property("DEBUG_SIP").contains("true")'>
+    <then>
+        <appender-ref ref="SIP_FILE"/>
+    </then>
+</if>
+
+<!-- AFTER: Simplified standard configuration -->
+<!-- SIP debugging (set to WARN by default, change to DEBUG if needed) -->
+<logger name="org.mjsip" level="WARN" additivity="false">
+    <appender-ref ref="SIP_CONSOLE"/>
+</logger>
+```
+
+**Files Modified:**
+- `src/main/resources/logback.xml` - Removed conditional blocks from lines 41-45, 51-55, 78-90
+- `target/classes/logback.xml` - Updated runtime configuration
+
+### Validation Results ✅ VERIFIED
+**Application Status After Fix:**
+- ✅ Logback configuration loads successfully without EmptyStackException
+- ✅ Application starts properly: "Starting SIP Monitor", "Registering with sip:vancouver2.voip.ms..."
+- ✅ All loggers and appenders configured correctly
+- ✅ SIP gateway operational with proper logging
+
+**PM2 Status:**
+- Process restarted successfully
+- No configuration errors in logs
+- Application running normally
+
 ## Notes
 - Implementation completed and tested successfully
 - All fixes are backward compatible and include fallback behavior
 - Ready for deployment - build successful with no compilation errors
 - **November 11 Update**: New prompt lifecycle issue identified, separate from previously fixed content lifecycle
+- **November 12 Update**: Logback configuration issue resolved - application now starts without Java configuration errors
